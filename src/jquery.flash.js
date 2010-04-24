@@ -8,7 +8,6 @@
  * @website http://jsui.de
  */
 
-
 ;(function($){
 
 $.fn.flash = function( method, options ) {
@@ -95,39 +94,45 @@ flash.prototype = {
     }    
 };
 
+var playerVersion;
 function detectVersion( v ) {
-    var descr, pv, maxVersion = 10;
+    // cache player version detection
+    var pv = playerVersion;
     
-    //thats NS, Mozilla, Firefox        
-    if (typeof navigator.plugins['Shockwave Flash'] == 'object') {
-        descr = navigator.plugins['Shockwave Flash'].description;
-        descr = descr.replace(/^.*\s+(\S+\s+\S+$)/, "$1");
-        pv = [
-            descr.replace(/^(.*)\..*$/, "$1"),
-            descr.replace(/^.*\.(.*)\s.*$/, "$1"),
-            /r/.test(descr) ? descr.replace(/^.*r(.*)$/, "$1") : 0
-        ];
-    //thats IE    
-    } else if ( typeof ActiveXObject == 'function') {
-        var ao;
-        for(var i = maxVersion; i >= 2; i--) {
-            try {
-                ao = new ActiveXObject('ShockwaveFlash.ShockwaveFlash.' + i);
-                if ( typeof ao == 'object' ) {
-                    descr = ao.GetVariable('$version'); 
-                    break;
-                };
-           } catch(e){};
+    if ( !pv ) {
+        var descr, pv, maxVersion = 10;
+        
+        //thats NS, Mozilla, Firefox        
+        if (typeof navigator.plugins['Shockwave Flash'] == 'object') {
+            descr = navigator.plugins['Shockwave Flash'].description;
+            descr = descr.replace(/^.*\s+(\S+\s+\S+$)/, "$1");
+            pv = [
+                descr.replace(/^(.*)\..*$/, "$1"),
+                descr.replace(/^.*\.(.*)\s.*$/, "$1"),
+                /r/.test(descr) ? descr.replace(/^.*r(.*)$/, "$1") : 0
+            ];
+        //thats IE    
+        } else if ( typeof ActiveXObject == 'function') {
+            var ao;
+            for(var i = maxVersion; i >= 2; i--) {
+                try {
+                    ao = new ActiveXObject('ShockwaveFlash.ShockwaveFlash.' + i);
+                    if ( typeof ao == 'object' ) {
+                        descr = ao.GetVariable('$version'); 
+                        break;
+                    };
+               } catch(e){};
+            }
+            
+            pv = descr.split(' ')[1].split(',');
         }
         
-        pv = descr.split(' ')[1].split(',');
+        if ( !pv && v ) return false;
+                    
+        v = toInt( v.split('.') );
+        playerVersion = pv = toInt( pv );
     }
     
-    if ( !pv && v ) return false;
-                
-    v = toInt( v.split('.') );
-    pv = toInt( pv );
-
     return (pv[0] > v[0] || (pv[0] == v[0] && pv[1] > v[1]) || (pv[0] == v[0] && pv[1] == v[1] && pv[2] >= v[2])) ? true : false;
 }
 
