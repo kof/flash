@@ -15,9 +15,9 @@ $.fn.flash = function( method, options ) {
         options = method;
         method = null;
     }
-    var s = $.extend(true, {}, $.fn.flash.defaults, options);
+    var s = $.extend(true, {}, $.flash.defaults, options);
     
-    if ( !detectVersion( s.version ) ) {
+    if ( !checkVersion( s.version ) ) {
         $.error('wrong flash version');
         return s.error.call(this, 'wrong flash version');    
     } 
@@ -25,37 +25,14 @@ $.fn.flash = function( method, options ) {
     var ret = this;
         
     this.each(function(){
-        var instance = $.data(this, 'flash') || $.data( this, 'flash', new flash($(this), s) );
+        var instance = $.data(this, 'flash') || $.data( this, 'flash', new $.flash($(this), s) );
         method && (ret = instance[method](options));
     });
     
     return ret;
 };
 
-$.fn.flash.defaults = {
-    swf: null,
-    version: '8.0.0',
-    params: {
-        scale: 'noscale',
-        allowfullscreen: true,
-        allowscriptaccess: 'always',
-        quality: 'best',
-        wmode: 'transparent',
-        bgcolor: 'transparent',
-        flashvars: null,
-        menu: false
-    },
-    attr: {
-        // needed by ie if using external interface
-        id: 'flash-' + (new Date).getTime(),
-        type: 'application/x-shockwave-flash',
-        width: null,
-        height: null
-    },
-    error: $.noop
-};
-
-function flash( $elem, s ) {
+$.flash = function( $elem, s ) {
     this.settings = s;
     //serialize flashvars if object is given
     $.isPlainObject(s.params.flashvars) && (s.params.flashvars = $.param(s.params.flashvars));
@@ -84,7 +61,30 @@ function flash( $elem, s ) {
     this._$flash = $elem.children();    
 }
 
-flash.prototype = {
+$.flash.defaults = {
+    swf: null,
+    version: '8.0.0',
+    params: {
+        scale: 'noscale',
+        allowfullscreen: true,
+        allowscriptaccess: 'always',
+        quality: 'best',
+        wmode: 'transparent',
+        bgcolor: 'transparent',
+        flashvars: null,
+        menu: false
+    },
+    attr: {
+        // needed by ie if using external interface
+        id: 'flash-' + (new Date).getTime(),
+        type: 'application/x-shockwave-flash',
+        width: null,
+        height: null
+    },
+    error: $.noop
+};
+
+$.flash.prototype = {
     destroy: function() {
         this._$elem.removeData('flash').html(this._$originContent);    
     },
@@ -95,12 +95,12 @@ flash.prototype = {
 };
 
 var playerVersion;
-function detectVersion( v ) {
+function checkVersion( v ) {
     // cache player version detection
     var pv = playerVersion;
     
     if ( !pv ) {
-        var descr, pv, maxVersion = 10;
+        var descr, maxVersion = 11;
         
         //thats NS, Mozilla, Firefox        
         if (typeof navigator.plugins['Shockwave Flash'] == 'object') {
@@ -120,7 +120,7 @@ function detectVersion( v ) {
                     if ( typeof ao == 'object' ) {
                         descr = ao.GetVariable('$version'); 
                         break;
-                    };
+                    }
                } catch(e){};
             }
             
