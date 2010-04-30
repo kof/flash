@@ -32,8 +32,14 @@ $.fn.flash = function( method, options ) {
     return ret;
 };
 
+var timestamp =  (new Date).getTime();
+
 $.flash = function( $elem, s ) {
     this.settings = s;
+
+    // id is needed by ie if using external interface
+    !s.attr.id && (s.attr.id = 'flash-' + timestamp++); 
+    
     //serialize flashvars if object is given
     $.isPlainObject(s.params.flashvars) && (s.params.flashvars = $.param(s.params.flashvars));
     
@@ -58,7 +64,7 @@ $.flash = function( $elem, s ) {
     }
     
     $elem[0].innerHTML = flash;
-    this._$flash = $elem.children();    
+    this._flashElem = $elem[0].childNodes[0];
 }
 
 $.flash.defaults = {
@@ -75,8 +81,6 @@ $.flash.defaults = {
         menu: false
     },
     attr: {
-        // needed by ie if using external interface
-        id: 'flash-' + (new Date).getTime(),
         type: 'application/x-shockwave-flash',
         width: null,
         height: null
@@ -90,7 +94,7 @@ $.flash.prototype = {
     },
     
     get: function() {
-        return this._$flash;    
+        return this._flashElem;
     }    
 };
 
