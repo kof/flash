@@ -18,9 +18,9 @@ $.fn.flash = function( method, options ) {
     var s = $.extend(true, {}, $.flash.defaults, options);
     
     if ( !checkVersion( s.version ) ) {
-        $.error('wrong flash version');
-        return s.error.call(this, 'wrong flash version');    
-    } 
+        s.error.call(this, 'wrong flash version');
+        $.error('wrong flash version');     
+    }
     
     var ret = this;
         
