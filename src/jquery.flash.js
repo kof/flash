@@ -17,7 +17,7 @@ $.fn.flash = function( method, options ) {
     }
     var s = $.extend(true, {}, $.flash.defaults, options);
     
-    if ( !checkVersion( s.version ) ) {
+    if ( s.checkVersion && !$.flash.checkVersion( s.version ) ) {
         s.error.call(this, 'wrong flash version');
         $.error('wrong flash version');     
     }
@@ -70,6 +70,7 @@ $.flash = function( $elem, s ) {
 $.flash.defaults = {
     swf: null,
     version: '8.0.0',
+    checkVersion: true,
     params: {
         scale: 'noscale',
         allowfullscreen: true,
@@ -99,7 +100,7 @@ $.flash.prototype = {
 };
 
 var playerVersion;
-function checkVersion( v ) {
+$.flash.checkVersion = function ( v ) {
     // cache player version detection
     var pv = playerVersion;
     
@@ -139,6 +140,7 @@ function checkVersion( v ) {
     
     return (pv[0] > v[0] || (pv[0] == v[0] && pv[1] > v[1]) || (pv[0] == v[0] && pv[1] == v[1] && pv[2] >= v[2])) ? true : false;
 }
+
 
 function toInt (arr) {    
     return $.map(arr, function(n, i){
