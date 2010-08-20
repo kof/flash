@@ -11,24 +11,24 @@
 ;(function($){
 
 $.fn.flash = function( method, options ) {
+
     if ( typeof method != 'string' ) {
         options = method;
         method = null;
     }
+
     var s = $.extend(true, {}, $.flash.defaults, options);
-    
-    if ( s.checkVersion && !$.flash.checkVersion( s.version ) ) {
+
+    if ( !$.flash.checkVersion( s.version ) ) {
         s.error.call(this, 'wrong flash version');
-        $.error('wrong flash version');     
+        return this;
     }
     
     var ret = this;
-        
     this.each(function(){
         var instance = $.data(this, 'flash') || $.data( this, 'flash', new $.flash($(this), s) );
         method && (ret = instance[method](options));
     });
-    
     return ret;
 };
 
@@ -57,7 +57,7 @@ $.flash = function( $elem, s ) {
         $.each(s.params, function(name, val){
             val && (flash+='<param name="'+name+'" value="'+val+'"/>');
         });
-        flash = '<object '+ toAttr(s.attr) +' classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">'+flash+'</object>';
+        flash = '<object ' + toAttr(s.attr) + '>'+flash+'</object>';
     } else {
         s.attr.src = s.swf;
         flash = '<embed' + toAttr(s.params) + toAttr(s.attr) + '/>';
@@ -70,7 +70,6 @@ $.flash = function( $elem, s ) {
 $.flash.defaults = {
     swf: null,
     version: '8.0.0',
-    checkVersion: true,
     params: {
         scale: 'noscale',
         allowfullscreen: true,
@@ -83,6 +82,7 @@ $.flash.defaults = {
     },
     attr: {
         type: 'application/x-shockwave-flash',
+        classid: 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
         width: null,
         height: null
     },
@@ -99,11 +99,8 @@ $.flash.prototype = {
     }    
 };
 
-var playerVersion;
+var pv;
 $.flash.checkVersion = function ( v ) {
-    // cache player version detection
-    var pv = playerVersion;
-    
     if ( !pv ) {
         var descr, maxVersion = 11;
         
@@ -118,15 +115,17 @@ $.flash.checkVersion = function ( v ) {
             ];
         //thats IE    
         } else if ( typeof ActiveXObject == 'function') {
-            var ao;
-            for(var i = maxVersion; i >= 2; i--) {
+            var ao, i;
+            for(i = maxVersion; i >= 2; i--) {
                 try {
                     ao = new ActiveXObject('ShockwaveFlash.ShockwaveFlash.' + i);
                     if ( typeof ao == 'object' ) {
                         descr = ao.GetVariable('$version'); 
                         break;
                     }
-               } catch(e){};
+               } catch(e){}
+               
+               if ( !ao ) return false;
             }
             
             pv = descr.split(' ')[1].split(',');
@@ -134,9 +133,10 @@ $.flash.checkVersion = function ( v ) {
         
         if ( !pv && v ) return false;
                     
-        v = toInt( v.split('.') );
-        playerVersion = pv = toInt( pv );
+        pv = toInt( pv );
     }
+
+    v = toInt( v.split('.') );
     
     return (pv[0] > v[0] || (pv[0] == v[0] && pv[1] > v[1]) || (pv[0] == v[0] && pv[1] == v[1] && pv[2] >= v[2])) ? true : false;
 }
