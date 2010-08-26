@@ -23,7 +23,6 @@ $.fn.flash = function( method, options ) {
         s.error.call(this, 'wrong flash version');
         return this;
     }
-    
     var ret = this;
     this.each(function(){
         var instance = $.data(this, 'flash') || $.data( this, 'flash', new $.flash($(this), s) );
@@ -116,6 +115,7 @@ $.flash.checkVersion = function ( v ) {
         //thats IE    
         } else if ( typeof ActiveXObject == 'function') {
             var ao, i;
+            
             for(i = maxVersion; i >= 2; i--) {
                 try {
                     ao = new ActiveXObject('ShockwaveFlash.ShockwaveFlash.' + i);
@@ -125,12 +125,13 @@ $.flash.checkVersion = function ( v ) {
                     }
                } catch(e){}
                
-               if ( !ao ) return false;
             }
+
+           if ( !ao ) return false;
             
             pv = descr.split(' ')[1].split(',');
         }
-        
+
         if ( !pv && v ) return false;
                     
         pv = toInt( pv );
